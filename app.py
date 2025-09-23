@@ -22,7 +22,7 @@ with col1:
     
     if ss.mode == "Selection":
         with st.form("select_form"):
-            kind = st.selectbox("Select a real landscape", ["Shrubland", "Grassland"])
+            kind = st.selectbox("Select a real landscape", ["shrubland", "grassland"])
             submit = st.form_submit_button("Load landscape")
         if submit:
             veg, plane, micro = load_empirical(kind)
@@ -35,7 +35,7 @@ with col1:
         with st.form("gen_form"):
             vegetation_cover = st.number_input("Vegetation cover", 0.0, 1.0, 0.3, 0.01, format="%.2f")
             clustering_prob = st.number_input("Clustering probability", 0.0, 1.0, 0.6, 0.1, format="%.1f")
-            kind = st.segmented_control("Vegetation type", ["Grassland", "Shrubland"], default="Shrubland")
+            kind = st.segmented_control("Vegetation type", ["grassland", "shrubland"], default="shrubland")
             submit = st.form_submit_button("Generate landscape")
         if submit:
             # Example: take empirical distribution as source for densities

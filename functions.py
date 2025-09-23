@@ -18,7 +18,7 @@ def load_empirical(kind: str):
     micro = elev - plane
     return veg, plane, micro
 
-def get_figsize(matrix_shape, max_width=10, max_height=10, cell_size=0.06):
+def get_figsize(matrix_shape, max_width=10, max_height=10, cell_size=0.04):
     n_rows, n_cols = matrix_shape
     # Calculate desired width and height based on cell size
     width, height = n_cols * cell_size, n_rows * cell_size
@@ -43,7 +43,6 @@ def generate_vegetation_matrix(rows, cols, ratio_v, pclust, v_source):
         v: 2D numpy array of vegetation densities, shape (rows, cols)
     '''
     v = np.zeros((rows, cols), dtype=float)
-    # Set of all free cells as coordinate tuples
     free_cells_list = [(i, j) for i in range(rows) for j in range(cols)]
     free_cells_set = set(free_cells_list)
     nb_veg_final, nb_veg = int(rows * cols * ratio_v), 0
@@ -217,4 +216,34 @@ def compute_SC(out: np.ndarray) -> np.ndarray:
     sc[sc < 0] = 0
     return sc
 
-
+def adapt_plane(plane: np.ndarray, new_height: int, new_width: int) -> np.ndarray:
+    """
+    Adapt a planar elevation field to a new (height, width):
+      - If new_height < original: crop from the top.
+      - If new_height > original: extend by continuing the average per-row decrement.
+      - Width is handled by repeating the 1D row profile across columns.
+    plane may be shape (R, 1) or (R, C) with constant values per row.
+    Returns an array of shape (new_height, new_width).
+    """
+    # Extract a 1D row profile (column vector) from the provided plane
+    if plane.ndim == 2:
+        # Use the first column as the per-row baseline (plane is constant across columns)
+        p = plane[:, 0].astype(float)
+    else:
+        p = np.asarray(plane, dtype=float).reshape(-1)
+    R = p.shape[0]
+    if new_height <= R:
+        p_new = p[:new_height]
+    else:
+        # Average per-row step (can be negative if decreasing top->bottom)
+        if R > 1:
+            step = float(np.mean(np.diff(p)))
+        else:
+            # Fallback: if single row, choose a small negative step so it decreases
+            step = -0.5
+        extra = new_height - R
+        tail = p[-1] + step * np.arange(1, extra + 1, dtype=float)
+        p_new = np.concatenate([p, tail], axis=0)
+    # Broadcast across columns to requested width
+    adapted = np.repeat(p_new[:, None], new_width, axis=1)
+    return adapted

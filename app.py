@@ -22,7 +22,7 @@ with col1:
     
     if ss.mode == "Selection":
         with st.form("select_form"):
-            kind = st.selectbox("Select a real landscape plot", ["Shrubland", "Grassland"])
+            kind = st.selectbox("Select a real landscape plot", ["shrubland", "grassland"])
             submit = st.form_submit_button("Load landscape")
         if submit:
             veg, plane, micro = load_empirical(kind)
@@ -38,7 +38,7 @@ with col1:
             height = col_h.number_input("Height (cells)", min_value=10, max_value=200, value=60, step=1)
             vegetation_cover = st.number_input("Vegetation cover", 0.0, 1.0, 0.3, 0.01, format="%.2f")
             clustering_prob = st.number_input("Clustering probability", 0.0, 1.0, 0.6, 0.1, format="%.1f")
-            kind = st.segmented_control("Vegetation type", ["Shrubland", "Grassland"], default="Shrubland")
+            kind = st.segmented_control("Vegetation type", ["shrubland", "grassland"], default="shrubland")
             submit = st.form_submit_button("Generate landscape")
         if submit:
             ss["gen_width"] = int(width)

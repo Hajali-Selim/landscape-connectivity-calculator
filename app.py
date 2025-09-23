@@ -10,8 +10,8 @@ ss.setdefault("generated", {})                 # dict with 'veg', 'micro'
 ss.setdefault("landscape_ready", False)
 
 interpolation_data = {
-    'Grassland': {'alpha': np.float64(0.001318), 'alpha_std': np.float64(0.032865), 'beta': np.float64(-0.003057)},
-    'Shrubland': {'alpha': np.float64(0.00842), 'alpha_std': np.float64(0.011797), 'beta': np.float64(-0.009644)}
+    'grassland': {'alpha': np.float64(0.001318), 'alpha_std': np.float64(0.032865), 'beta': np.float64(-0.003057)},
+    'shrubland': {'alpha': np.float64(0.00842), 'alpha_std': np.float64(0.011797), 'beta': np.float64(-0.009644)}
 }
 
 # Create two columns: 1/4 (sidebar) and 3/4 (main area)
@@ -19,7 +19,6 @@ col1, col2 = st.columns([1, 3])
 
 with col1:
     ss.mode = st.segmented_control("Select a mode:", ["Selection", "Generation"], default=ss.mode)
-    print('')
     if ss.mode == "Selection":
         with st.form("select_form"):
             kind = st.selectbox("Select a real landscape plot", ["shrubland", "grassland"])

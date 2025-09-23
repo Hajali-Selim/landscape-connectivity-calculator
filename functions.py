@@ -4,11 +4,16 @@ import matplotlib.pyplot as plt
 import random
 from scipy.ndimage import convolve
 from collections import deque
+import os
 
-@st.cache_data
+BASE_DIR = os.path.dirname(__file__)
+#@st.cache_data
 def load_empirical(kind: str):
-    veg = np.loadtxt(f'field-data/{kind}/vegetation.asc', skiprows=6)[1:-1, 1:-1]/100
-    elev = np.loadtxt(f'field-data/{kind}/topography.asc',  skiprows=6)[1:-1, 1:-1]
+    veg_path = os.path.join(BASE_DIR, "field-data", kind, "vegetation.asc")
+    elev_path = os.path.join(BASE_DIR, "field-data", kind, "topography.asc")
+
+    veg = np.loadtxt(veg_path)[1:-1, 1:-1] / 100
+    elev = np.loadtxt(elev_path)[1:-1, 1:-1]
     plane = elev.mean(axis=1, keepdims=True)
     micro = elev - plane
     return veg, plane, micro

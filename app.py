@@ -19,7 +19,7 @@ col1, col2 = st.columns([1, 3])
 
 with col1:
     ss.mode = st.segmented_control("Select a mode:", ["Selection", "Generation"], default=ss.mode)
-    
+    print('')
     if ss.mode == "Selection":
         with st.form("select_form"):
             kind = st.selectbox("Select a real landscape plot", ["shrubland", "grassland"])

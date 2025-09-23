@@ -12,10 +12,6 @@ def load_empirical(kind: str):
     veg_path = os.path.join(BASE_DIR, "field-data", kind, "vegetation.asc")
     elev_path = os.path.join(BASE_DIR, "field-data", kind, "topography.asc")
     
-    st.write("Looking for:", veg_path)
-    st.write("Exists?", os.path.exists(veg_path))
-    st.write("CWD:", os.getcwd())
-    
     veg = np.loadtxt(veg_path)[1:-1, 1:-1] / 100
     elev = np.loadtxt(elev_path)[1:-1, 1:-1]
     plane = elev.mean(axis=1, keepdims=True)

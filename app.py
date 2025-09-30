@@ -18,7 +18,7 @@ interpolation_data = {
 col1, col2 = st.columns([1, 3])
 
 with col1:
-    ss.mode = st.segmented_control("Select a mode:", ["Selection", "Generation"], default=ss.mode)
+    ss.mode = st.segmented_control("Select a mode", ["Selection", "Generation"], default=ss.mode)
     if ss.mode == "Selection":
         with st.form("select_form"):
             kind = st.selectbox("Select a real landscape plot", ["shrubland", "grassland"])
@@ -40,17 +40,20 @@ with col1:
             kind = st.segmented_control("Vegetation type", ["shrubland", "grassland"], default="shrubland")
             submit = st.form_submit_button("Generate landscape")
         if submit:
-            ss["gen_width"] = int(width)
-            ss["gen_height"] = int(height)
-            v_src, plane, _ = load_empirical(kind)
-            v = generate_vegetation_matrix(height, width, vegetation_cover, clustering_prob, v_src)
-            micro = generate_microtopography(v, interpolation_data[kind])
-            plane_adapted = adapt_plane(plane, height, width)
-            d4_direction = d4_steepest_descent(plane_adapted+micro)
-            sc = compute_SC(d4_direction)
-            ss.generated = {"veg": v, "micro": micro, "sc": sc, "kind": kind}
-            ss.current_source = "generated"
-            ss.landscape_ready = True
+            if not kind:
+                st.warning("Please select a vegetation type to generate a landscape.")
+            else:
+                ss["gen_width"] = int(width)
+                ss["gen_height"] = int(height)
+                v_src, plane, _ = load_empirical(kind)
+                v = generate_vegetation_matrix(height, width, vegetation_cover, clustering_prob, v_src)
+                micro = generate_microtopography(v, interpolation_data[kind])
+                plane_adapted = adapt_plane(plane, height, width)
+                d4_direction = d4_steepest_descent(plane_adapted+micro)
+                sc = compute_SC(d4_direction)
+                ss.generated = {"veg": v, "micro": micro, "sc": sc, "kind": kind}
+                ss.current_source = "generated"
+                ss.landscape_ready = True
 with col2:
     map_kind = st.segmented_control("Show map", ["Vegetation", "Microtopography", "Structural Connectivity"], default="Vegetation")
     src = ss.current_source

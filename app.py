@@ -41,7 +41,7 @@ with col1:
             submit = st.form_submit_button("Generate landscape")
         if submit:
             if not kind:
-                st.warning("Please select a vegetation type to generate a landscape.")
+                st.error("Please select a vegetation type to generate a landscape.")
             else:
                 ss["gen_width"] = int(width)
                 ss["gen_height"] = int(height)

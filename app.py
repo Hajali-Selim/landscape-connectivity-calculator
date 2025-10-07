@@ -15,7 +15,7 @@ interpolation_data = {
 }
 
 # Create two columns: 1/4 (sidebar) and 3/4 (main area)
-col1, col2 = st.columns([1, 3])
+col1, col2 = st.columns([1, 2.5])
 
 with col1:
     ss.mode = st.segmented_control("Select a mode", ["Selection", "Generation"], default=ss.mode)
@@ -24,16 +24,17 @@ with col1:
             kind = st.selectbox("Select a real landscape plot", ["shrubland", "grassland"])
             submit = st.form_submit_button("Load landscape")
         if submit:
-            veg, plane, micro = load_empirical(kind)
+            v, plane, micro = load_empirical(kind)
             d4_direction = d4_steepest_descent(plane+micro)
             sc = compute_SC(d4_direction)
-            ss.empirical = {"veg": veg, "micro": micro, "sc": sc, "kind": kind}
+            ss.empirical = {"veg": v, "micro": micro, "sc": sc, "kind": kind}
             ss.current_source = "empirical"
             ss.landscape_ready = True
+            ss['v'], ss['micro'], ss['sc'] = v, micro, sc
     else:
         with st.form("gen_form"):
             col_w, col_h = st.columns(2)
-            width = col_w.number_input("Width (cells)", min_value=10, max_value=200, value=20, step=1)
+            width = col_w.number_input("Width (cells)", min_value=10, max_value=120, value=20, step=1)
             height = col_h.number_input("Height (cells)", min_value=10, max_value=200, value=60, step=1)
             vegetation_cover = st.number_input("Vegetation cover", 0.0, 1.0, 0.3, 0.01, format="%.2f")
             clustering_prob = st.number_input("Clustering probability", 0.0, 1.0, 0.6, 0.1, format="%.1f")
@@ -41,7 +42,7 @@ with col1:
             submit = st.form_submit_button("Generate landscape")
         if submit:
             if not kind:
-                st.error("Please select a vegetation type to generate a landscape.")
+                st.warning("Please select a vegetation type to generate a landscape.")
             else:
                 ss["gen_width"] = int(width)
                 ss["gen_height"] = int(height)
@@ -54,6 +55,12 @@ with col1:
                 ss.generated = {"veg": v, "micro": micro, "sc": sc, "kind": kind}
                 ss.current_source = "generated"
                 ss.landscape_ready = True
+                ss['v'], ss['micro'], ss['sc'] = v, micro, sc
+    if ss.landscape_ready:
+        st.write('Total vegetation:', round(np.sum(ss['v']),2))
+        st.write('Mean microtopography:', round(1e3*np.mean(ss['micro']),2),'10$^{-3}$ m')
+        st.write('Mean Structural Connectivity:', round(np.mean(ss['sc']),2))
+        st.write('Structural Connectivity standard deviation:', round(np.std(ss['sc']),2))
 with col2:
     map_kind = st.segmented_control("Show map", ["Vegetation", "Microtopography", "Structural Connectivity"], default="Vegetation")
     src = ss.current_source
@@ -62,7 +69,15 @@ with col2:
         # TODO: add structural connectivity if available; fallback to vegetation
         cmap = "Greens" if map_kind == "Vegetation" else ("rainbow" if map_kind == "Microtopography" else "terrain_r")
         fig, ax = plt.subplots(figsize=get_figsize(data.shape))
-        ax.imshow(data, cmap=cmap, aspect="equal")
+        p = ax.imshow(data, cmap=cmap, aspect="equal")
+        cbar = plt.colorbar(p, ax=ax, orientation="horizontal", fraction=.1, pad=.03, shrink=.82)
+        cbar.ax.tick_params(labelsize=5, pad=1)
+        cbar.outline.set_linewidth(0.5)
+        if map_kind == 'Microtopography':
+            map_kind += ' (m)'
+        elif map_kind == 'Structural Connectivity':
+            map_kind = 'Structural\nConnectivity'
+        cbar.set_label(map_kind, size=4, labelpad=2)
         ax.axis("off")
         st.pyplot(fig, use_container_width=False)
     else:
